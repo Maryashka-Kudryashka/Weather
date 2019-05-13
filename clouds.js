@@ -56,11 +56,11 @@ function drawCloud(cloud, context) {
 export function updateClouds() {
   ctx.clearRect(0, 0, c.width, c.height);
   ctx.rect(0, 0, w, 550);
-  var grd = ctx.createLinearGradient(150, 0, 150, 650);
+  var grd = ctx.createLinearGradient(150, 0, 150, h - 170);
   grd.addColorStop(0.0, '#6aaede');
   grd.addColorStop(1.0, '#edf6ff');
   ctx.fillStyle = grd;
-  ctx.fillRect(0, 0, w, 650);
+  ctx.fillRect(0, 0, w, h - 170);
 
   clouds.forEach(cloud => drawCloud(cloud, ctx));
 
