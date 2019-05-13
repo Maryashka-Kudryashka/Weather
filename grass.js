@@ -30,8 +30,8 @@ function divide(min = 0, max, units, n) {
 
 function generate(number) {
   for (var i = 0; i < number; i++) {
-    var height = random(650, h + 40);
-    var colorGroup = Math.min(divide(650, h + 41, 6, height), 5);
+    var height = random(h - 170, h + 40);
+    var colorGroup = Math.min(divide(h - 170, h + 41, 6, height), 5);
     var color = colors[colorGroup][random(0, colors[colorGroup].length)];
     var angle = random(-15, 15);
     var speed = random(2, 6);
@@ -72,7 +72,7 @@ function getGrassCanvas(windConfig) {
     var m_context = m_canvas.getContext("2d");
     m_context.fillStyle = colors[0][random(0, 2)];
     m_context.beginPath();
-    m_context.rect(0, 650, w, 450);
+    m_context.rect(0, h - 170, w, 450);
     m_context.fillStyle = "#71775b";
     m_context.fill();
     drawGrass(m_context, windConfig);

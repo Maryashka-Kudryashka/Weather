@@ -27,7 +27,7 @@ const minAngle = 15;
 const maxBranchLenght = 8;
 const minBranchLenght = 1;
 const leafBendability = 17;
-const treeStart = 655;
+const treeStart = h - 165;
 let leafColorArray = [
   "#b8d23d",
   "#a7c33d",
