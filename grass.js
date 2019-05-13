@@ -16,7 +16,9 @@ const canvases = {};
 const dots = [];
 const grassWidth = 5;
 const grassHeight = 70;
-generate(4000);
+const units = w * 3;
+
+generate(units);
 
 function random(min, max) {
   return min + Math.floor(Math.random() * (max + 1 - min));
@@ -70,7 +72,7 @@ function getGrassCanvas(windConfig) {
     var m_context = m_canvas.getContext("2d");
     m_context.fillStyle = colors[0][random(0, 2)];
     m_context.beginPath();
-    m_context.rect(0, 650, 1500, 450);
+    m_context.rect(0, 650, w, 450);
     m_context.fillStyle = "#71775b";
     m_context.fill();
     drawGrass(m_context, windConfig);

@@ -39,7 +39,7 @@ window.addEventListener("load", () => {
     // windActual = Math.max(0, windActual);
   }
 
-  (function init() {
+  function init() {
     const from = -80;
     const to = 80;
 
@@ -54,7 +54,12 @@ window.addEventListener("load", () => {
       const windConfig = { windActual, windX: -1, windY: 0 };
       updateTree(windConfig);
     }
-  })()
+  };
+
+
+  init();
+  const loader = document.querySelector('#loader');
+  if (loader) loader.style.display = 'none';
 
   function update() {
     var windConfig = { windActual, windX, windY }
