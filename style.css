@@ -1,0 +1,31 @@
+body {
+  /* background: #222; */
+  margin: 0;
+  /* overflow: hidden;   */
+}
+
+#grass {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#tree {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#snow {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#rain {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+
