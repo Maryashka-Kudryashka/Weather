@@ -6,14 +6,17 @@ var ctx = canvas.getContext("2d");
 var w = canvas.width;
 var h = canvas.height;
 ctx.strokeStyle = "rgba(195, 207, 226,0.5)";
-ctx.lineWidth = 1;
 ctx.lineCap = "round";
-
-var maxParts = 1000;
 var particles = [];
-generate()
 
-function generate() {
+export function generateRain(weatherConditions) {
+  const { weather } = weatherConditions;
+  if (weather == "Rain") {
+    ctx.lineWidth = 1;
+  } else {
+    ctx.lineWidth = 0.7;
+  }
+  var maxParts = weatherConditions.rain.precipitationAmount;
   for (var a = 0; a < maxParts; a++) {
     particles.push({
       x: Math.random() * w,

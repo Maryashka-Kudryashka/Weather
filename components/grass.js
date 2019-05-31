@@ -14,11 +14,7 @@ canvas.width = w;
 canvas.height = h;
 const canvases = {};
 const dots = [];
-const grassWidth = 5;
-const grassHeight = 70;
-const units = w * 3;
-
-generate(units);
+var units;
 
 function random(min, max) {
   return min + Math.floor(Math.random() * (max + 1 - min));
@@ -28,34 +24,49 @@ function divide(min = 0, max, units, n) {
   return Math.floor((n - min) / ((max - min) / units));
 }
 
-function generate(number) {
-  for (var i = 0; i < number; i++) {
-    var height = random(h - 170, h + 40);
-    var colorGroup = Math.min(divide(h - 170, h + 41, 6, height), 5);
+export function generateGrass(weatherConditions) {
+  const { isSnow, month } = weatherConditions;
+  const isWinter = month == 11 || month == 0 || month == 1 || month == 10 || month == 2;
+  if (isSnow) {
+    units = w * 1.5;
+  }
+  if (isWinter) {
+    units = w * 4;
+  } else {
+    units = w * 3;
+  }
+  for (var i = 0; i < units; i++) {
+    var y = random(h - 170, h + 40);
+    var colorGroup = Math.min(divide(h - 170, h + 41, 6, y), 5);
     var color = colors[colorGroup][random(0, colors[colorGroup].length)];
+    var angleGroup = divide(h - 170, h + 41, 10, y);
+    var randomNumber = random(10 - angleGroup, 10);
+    var angle = random(randomNumber, 5);
     var angle = random(-15, 15);
     var speed = random(2, 6);
-    dots.push([random(0, w), height, color, angle, speed]);
+    dots.push([random(0, w), y, color, angle, speed]);
   }
   dots.sort((a, b) => a[1] - b[1]);
 }
 
-function drawGrass(context, windConfig) {
+function drawGrass(context, windConfig, grassSize) {
   const wind = windConfig.windActual;
+  // const wind = 0.0000001;
+  const { width, height } = grassSize;
   dots.forEach(([x, y, fill, angle, speed]) => {
     context.fillStyle = fill;
     context.beginPath();
     context.moveTo(x, y);
     context.quadraticCurveTo(
       x - wind * speed + angle,
-      y - grassHeight / 2,
-      x - grassWidth / 2 + wind * speed * 2 + angle,
-      y - grassHeight + Math.abs(wind * speed + angle) 
+      y - height / 2,
+      x - width / 2 + wind * speed * 2 + angle,
+      y - height + Math.abs(wind * speed + angle)
     );
     context.quadraticCurveTo(
-      x - grassWidth - wind * speed + angle,
-      y - grassHeight / 2,
-      x - grassWidth,
+      x - width - wind * speed + angle,
+      y - height / 2,
+      x - width,
       y
     );
 
@@ -63,7 +74,7 @@ function drawGrass(context, windConfig) {
   });
 }
 
-function getGrassCanvas(windConfig) {
+function getGrassCanvas(windConfig, grassSize) {
   const key = parseInt(windConfig.windActual * 60);
   if (!canvases[key]) {
     var m_canvas = document.createElement("canvas");
@@ -75,13 +86,13 @@ function getGrassCanvas(windConfig) {
     m_context.rect(0, h - 170, w, 450);
     m_context.fillStyle = "#71775b";
     m_context.fill();
-    drawGrass(m_context, windConfig);
+    drawGrass(m_context, windConfig, grassSize);
     canvases[key] = m_canvas;
   }
   return canvases[key];
 }
 
-export function updateGrass(windConfig) {
+export function updateGrass(windConfig, grassSize) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(getGrassCanvas(windConfig), 0, 0);
+  ctx.drawImage(getGrassCanvas(windConfig, grassSize), 0, 0);
 }

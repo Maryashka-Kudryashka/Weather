@@ -54,4 +54,16 @@ body {
   left: 0;
 }
 
+.control {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 20px;
+}
 
+#open {
+  position: absolute;
+  top: 0;
+  right: 0;
+  /* margin: 20px; */
+}

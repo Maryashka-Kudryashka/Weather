@@ -81,10 +81,10 @@ function moveSnowFlakes(windActual) {
   }
 }
 
-export function updateSnowFall(windActual) {
+export function updateSnowFall(windConfig) {
   ctx.clearRect(0, 0, w, h);
   drawSnowFlakes();
-  moveSnowFlakes(windActual);
+  moveSnowFlakes(windConfig.windActual);
 }
 
 createSnowFlakes();

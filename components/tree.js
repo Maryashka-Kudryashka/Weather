@@ -7,8 +7,6 @@ canvasTree.width = w;
 canvasTree.height = h;
 const bendability = 2; // greater than 1. The bigger this number the more the thin branches will bend first
 
-const windStrength = 0.3 * bendability * (200 ** 2 / canvasTree.height ** 2); // wind strength
-
 const canvases = {};
 const leavesCanvases = {};
 
@@ -17,35 +15,28 @@ let context = canvasTree.getContext("2d");
 let arr = [];
 let lines = {};
 let leaves = {};
+let leafColorArrayLen;
+let leavesColors = [0, 0];
+let darkestColor;
 let maxDepth = 13;
-const leafDeviation = 60;
-const leafHeight = 20;
+let leavesVisibility;
 const branchGroupDepth = 10;
 const leavesGroupSize = 2 ** (branchGroupDepth - 1);
 const maxAngle = 20;
 const minAngle = 15;
-const maxBranchLenght = Math.ceil(h / 100);
+const maxBranchLenght = Math.ceil(h / 102);
 const minBranchLenght = 1;
-const leafBendability = 17;
+const leafBendability = 20;
 const treeStart = h - 165;
-let leafColorArray = [
-  "#b8d23d",
-  "#a7c33d",
-  "#92a927",
-  "#6b8b29",
-  "#647a24",
-  "#4d6019",
-  "#4b6e24",
-  "#344c0c",
-  "#1e3418",
-  "#244626"
-];
-const leafColorArrayLen = leafColorArray.length;
-const colors = leafColorArray.concat(leafColorArray.slice(0).reverse());
 let groupCounter = 0;
 let branchCounter = 0;
+var windStrength;
 
-generate(-90, maxDepth, arr);
+function valueTransformer(aFrom, aTo, bFrom, bTo, aVal) {
+  const percentage = ((aVal - aFrom) * 100) / (aTo - aFrom);
+  const bVal = (percentage * (bTo - bFrom) / 100) + bFrom; 
+  return bVal;
+}
 
 function divide(min = 0, max, units, n) {
   return Math.min(Math.floor((n - min) / ((max - min) / units)), units);
@@ -57,15 +48,39 @@ function random(min, max) {
 const calcX = (angle, r) => r * Math.cos(angle);
 const calcY = (angle, r) => r * Math.sin(angle);
 
-function generate(angle, depth, arr) {
+export function generateTree(weatherConditions) {
+  const { month, wind } = weatherConditions;
+  const { treeColor } = weatherConditions.tree;
+  windStrength = valueTransformer(0, 3, 0, 1, wind) * bendability * (200 ** 2 / canvasTree.height ** 2); // wind strength
+
+
+  if (month == 9) {
+    leavesVisibility = 1;
+  } else if (month == 10) {
+    leavesVisibility = 4;
+  } else {
+    leavesVisibility = 0;
+  }
+  if (month != 11 && month != 0 && month != 1 && month != 2) {
+    leafColorArrayLen = treeColor.length - 1;
+    darkestColor = treeColor[leafColorArrayLen]
+    leavesColors = treeColor.concat(
+      treeColor.slice(0).reverse()
+    );
+  }
+  generate(-90, maxDepth, arr, 1);
+}
+
+function generate(angle, depth, arr, visibility) {
   let randomLeafColor =
-    colors[
+  leavesColors[
       divide(0, leavesGroupSize, (leafColorArrayLen - 1) * 2, groupCounter)
     ];
   arr.push({
     angle,
     branchArmLength: random(minBranchLenght, maxBranchLenght),
-    color: randomLeafColor
+    color: randomLeafColor,
+    visibility
   });
 
   if (depth === branchGroupDepth) {
@@ -76,16 +91,17 @@ function generate(angle, depth, arr) {
   }
   if (depth != 0) {
     if (depth > 1) {
-      generate(angle - random(minAngle, maxAngle), depth - 1, arr);
-      generate(angle + random(minAngle, maxAngle), depth - 1, arr);
+      generate(angle - random(minAngle, maxAngle), depth - 1, arr, 1);
+      generate(angle + random(minAngle, maxAngle), depth - 1, arr, 1);
     } else {
-      generate(angle, depth - 1, arr);
+      const leavesVisibilityProbability = random(0, leavesVisibility);
+      generate(angle, depth - 1, arr, leavesVisibilityProbability);
     }
   }
 }
 
 function branch(x1, y1, arr, depth, windConfig) {
-  let { branchArmLength, angle, color } = arr[branchCounter++];
+  let { branchArmLength, angle, color, visibility } = arr[branchCounter++];
   let { windActual, windX, windY } = windConfig;
   let dir = angle * (Math.PI / 180.0);
 
@@ -114,7 +130,7 @@ function branch(x1, y1, arr, depth, windConfig) {
     const windSideWayForce = windX * yy - windY * xx;
     const leafAngle = angle + windActual * windSideWayForce * leafBendability;
     leaves[color] = leaves[color] || [];
-    leaves[color].push([x1, y1, leafAngle]);
+    leaves[color].push([x1, y1, leafAngle, visibility]);
   }
 }
 
@@ -136,119 +152,45 @@ function drawLines(context) {
   });
 }
 
-function drawLeaves(context) {
+function drawLeaves(context, treeConfig) {
+  const { leavesSize, treeColor } = treeConfig;
   Object.entries(leaves)
     .sort((a, b) => a[0].localeCompare(b[0]))
     .forEach(([color, leaves]) => {
-      const strokeColorIndex = leafColorArray.indexOf(color);
+      const strokeColorIndex = treeColor.indexOf(color);
       const strokeColor =
-        strokeColorIndex == leafColorArray.length - 1
-          ? "#1f3d21"
-          : leafColorArray[strokeColorIndex + 1];
+        strokeColorIndex == treeColor.length - 1
+          ? darkestColor
+          : treeColor[strokeColorIndex + 1];
       context.fillStyle = color;
       context.strokeStyle = strokeColor;
       context.beginPath();
-
       while (leaves.length) {
-        const [x, y, angle] = leaves.pop();
-        const leafAng = angle * (Math.PI / 180);
-        const devAng = leafDeviation * (Math.PI / 180);
-        let x2 = x + calcX(leafAng, leafHeight),
-          y2 = y + calcY(leafAng, leafHeight),
-          x3 = x + calcX(leafAng + devAng, leafHeight / 2),
-          y3 = y + calcY(leafAng + devAng, leafHeight / 2),
-          x4 = x + calcX(leafAng - devAng, leafHeight / 2),
-          y4 = y + calcY(leafAng - devAng, leafHeight / 2);
+        const [x, y, angle, visibility] = leaves.pop();
+        if (!visibility) {
+          const leafAng = angle * (Math.PI / 180);
+          const devAng = leavesSize.deviation * (Math.PI / 180);
+          const leafHeight = leavesSize.height;
+          let x2 = x + calcX(leafAng, leafHeight),
+            y2 = y + calcY(leafAng, leafHeight),
+            x3 = x + calcX(leafAng + devAng, leafHeight / 2),
+            y3 = y + calcY(leafAng + devAng, leafHeight / 2),
+            x4 = x + calcX(leafAng - devAng, leafHeight / 2),
+            y4 = y + calcY(leafAng - devAng, leafHeight / 2);
 
-        context.moveTo(x, y);
-        context.quadraticCurveTo(x3, y3, x2, y2);
-        context.quadraticCurveTo(x4, y4, x, y);
+          context.moveTo(x, y);
+          context.quadraticCurveTo(x3, y3, x2, y2);
+          context.quadraticCurveTo(x4, y4, x, y);
 
-        context.moveTo(x, y);
-        context.lineTo(x2, y2);
+          context.moveTo(x, y);
+          context.lineTo(x2, y2);
+        }
       }
 
       context.closePath();
       context.fill();
       context.stroke();
     });
-
-  
-
-
-  //   const x = 400;
-  //   const y = 400;
-  //   const xa = 750;
-  //   const angle = -90;
-  //   context.fillStyle = "#647a24";
-  //   context.strokeStyle = "#4d6019";
-  //   const deviation = 60;
-  //   const leafHeight = 200;
-
-  //   context.beginPath();
-
-  //   // let x2 = x + calcX(angle, leafHeight),
-  //   //   y2 = y + calcY(angle, leafHeight),
-  //   //   x3 =
-  //   //     x +
-  //   //     calcX(angle, leafHeight / 2) +
-  //   //     calcX(angle + deviation, leafHeight / 2),
-  //   //   y3 =
-  //   //     y +
-  //   //     calcY(angle, leafHeight / 2) +
-  //   //     calcY(angle + deviation, leafHeight / 2),
-  //   //   x4 =
-  //   //     x +
-  //   //     calcX(angle, leafHeight / 2) +
-  //   //     calcX(angle - deviation, leafHeight / 2),
-  //   //   y4 =
-  //   //     y +
-  //   //     calcY(angle, leafHeight / 2) +
-  //   //     calcY(angle - deviation, leafHeight / 2);
-
-  //   let x2 = x + calcX(angle, leafHeight),
-  //   y2 = y + calcY(angle, leafHeight),
-  //   x3 =
-  //     x +
-  //     calcX(angle + deviation, leafHeight / 2),
-  //   y3 =
-  //     y +
-  //     calcY(angle + deviation, leafHeight / 2),
-  //   x4 =
-  //     x +
-  //     calcX(angle - deviation, leafHeight / 2),
-  //   y4 =
-  //     y +
-  //     calcY(angle -
-  //        deviation, leafHeight / 2);
-
-  //   let x2a = xa + calcX(angle, leafHeight),
-  //     x3a =
-  //       xa +
-  //       calcX(angle, leafHeight / 2) +
-  //       calcX(angle + deviation, leafHeight / 2),
-  //     x4a =
-  //       xa +
-  //       calcX(angle, leafHeight / 2) +
-  //       calcX(angle - deviation, leafHeight / 2);
-
-  //   context.moveTo(x, y);
-  //   context.quadraticCurveTo(x3, y3, x2, y2);
-  //   context.quadraticCurveTo(x4, y4, x, y);
-
-  //   context.moveTo(x, y);
-  //   context.lineTo(x2, y2);
-
-  //   // context.moveTo(xa, y);
-  //   // context.quadraticCurveTo(x3a, y3, x2a, y2);
-  //   // context.quadraticCurveTo(x4a, y4, xa, y);
-
-  //   // context.moveTo(xa, y);
-  //   // context.lineTo(x2a, y2);
-
-  //   context.closePath();
-  //   context.fill();
-  //   context.stroke();
 }
 
 function getTreeCanvas(windConfig) {
@@ -272,7 +214,7 @@ function getTreeCanvas(windConfig) {
   return canvases[key];
 }
 
-function getLeavesCanvas(wind) {
+function getLeavesCanvas(wind, colors) {
   const key = parseInt(wind * 60);
 
   if (!leavesCanvases[key]) {
@@ -280,15 +222,21 @@ function getLeavesCanvas(wind) {
     m_canvas.width = canvasTree.width;
     m_canvas.height = canvasTree.height;
     let m_context = m_canvas.getContext("2d");
-    drawLeaves(m_context, wind);
+    drawLeaves(m_context, colors);
     leavesCanvases[key] = m_canvas;
   }
 
   return leavesCanvases[key];
 }
 
-export function updateTree(windConfig) {
+export function updateTree(windConfig, weatherConditions) {
+  const { treeColor } = weatherConditions.tree;
   context.clearRect(0, 0, canvasTree.width, canvasTree.height);
-  context.drawImage(getTreeCanvas(windConfig), 0, 0); 
-  context.drawImage(getLeavesCanvas(windConfig.windActual), 0, 0);
+  context.drawImage(getTreeCanvas(windConfig), 0, 0);
+  treeColor &&
+    context.drawImage(
+      getLeavesCanvas(windConfig.windActual, weatherConditions.tree),
+      0,
+      0
+    );
 }

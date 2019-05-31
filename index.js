@@ -1,74 +1,56 @@
-import { updateTree } from "./tree.js";
-import { updateGrass } from "./grass.js";
-import { updateClouds } from "./clouds.js";
-import { updateSnowFall } from "./snow.js";
-import { updateRain } from "./rain.js";
+import { updateTree } from "./components/tree.js";
+import { generateTree } from "./components/tree.js";
+import { updateGrass } from "./components/grass.js";
+import { generateGrass } from "./components/grass.js";
+import { generateClouds } from "./components/clouds.js";
+import { updateClouds } from "./components/clouds.js";
+import { initClouds } from "./components/clouds.js";
+import { updateSnowFall } from "./components/snow.js";
+import { updateRain } from "./components/rain.js";
+import { generateRain } from "./components/rain.js"
+import { updateWind } from "./components/wind.js";
+import { generateWind } from "./components/wind.js";
+import { weather } from "./weatherConfig.js";
 
-window.addEventListener("load", () => {
-  const windX = -1; // wind direction vector
-  const windY = 0;
-  const windBendRectSpeed = 0.01; // how fast the tree reacts to the wing
-  const windBranchSpring = 0.98; // the amount and speed of the branch spring back
+window.addEventListener("load", async () => {
+  var weatherConditions = await weather();
 
-  const gustProbability = 2 / 100; // how often there is a gust of wind
+  generateWind(weatherConditions)
+  generateClouds(weatherConditions);
+  generateTree(weatherConditions);
+  generateGrass(weatherConditions);
+  weatherConditions.rain.isRain && generateRain(weatherConditions)
 
-  var windCycle = 0;
-  var windCycleGust = 0;
-  var windCycleGustTime = 0;
-  var currentWind = 0;
-  var windFollow = 0;
-  var windActual = 0;
-
-
-  function updateWind() {
-    if (Math.random() < gustProbability) {
-      windCycleGustTime = (Math.random() * 10 + 1) | 0;
-    }
-    if (windCycleGustTime > 0) {
-      windCycleGustTime--;
-      windCycleGust += windCycleGustTime / 20;
-    } else {
-      windCycleGust *= 0.99;
-    }
-    windCycle += windCycleGust;
-    currentWind = (Math.sin(windCycle / 40) * 0.6 + 0.4) ** 2;
-    currentWind = currentWind < 0 ? 0 : currentWind;
-    windFollow += (currentWind - windActual) * windBendRectSpeed;
-    windFollow *= windBranchSpring;
-    windActual += windFollow;
-    // windActual = Math.max(0, windActual);
-  }
-
-  function init() {
+  function init(weatherConditions) {
     const from = -80;
     const to = 80;
 
     for (let i = from; i <= to; i++) {
       const windActual = i / 60;
       const windConfig = { windActual, windX: -1, windY: 0 };
-      updateGrass(windConfig);
+      updateGrass(windConfig, weatherConditions.grassSize);
     }
 
     for (let i = from; i <= to; i++) {
       const windActual = i / 60;
       const windConfig = { windActual, windX: -1, windY: 0 };
-      updateTree(windConfig);
+      updateTree(windConfig, weatherConditions);
     }
-  };
 
+    initClouds(weatherConditions)
+  }
 
-  init();
-  const loader = document.querySelector('#loader');
-  if (loader) loader.style.display = 'none';
+  init(weatherConditions);
+  const loader = document.querySelector("#loader");
+  if (loader) loader.style.display = "none";
 
   function update() {
-    var windConfig = { windActual, windX, windY }
-    updateTree(windConfig);
-    updateGrass(windConfig);
-    updateClouds();
-    // updateSnowFall(windActual);
-    // updateRain(windConfig);
-    updateWind();
+    var windConfig = updateWind(weatherConditions);
+    updateTree(windConfig, weatherConditions);
+    updateGrass(windConfig, weatherConditions.grassSize);
+    updateClouds(weatherConditions);
+    weatherConditions.isSnow && updateSnowFall(windConfig);
+    weatherConditions.rain.isRain && updateRain(windConfig);
     requestAnimationFrame(update);
   }
   requestAnimationFrame(update);
