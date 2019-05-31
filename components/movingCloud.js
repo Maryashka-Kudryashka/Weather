@@ -98,8 +98,6 @@ export function cloud(type, windSpeed) {
       newCanvas.height = canvasHeight;
       var newContext = newCanvas.getContext("2d");
 
-      newContext.rect(0,0,canvasWidth,canvasHeight)
-      newContext.stroke()
 
       clouds.forEach(el => drawCloud(el, imgCloud, newContext));
       innerClouds.forEach(el => drawCloud(el, imgInnerCloud, newContext));

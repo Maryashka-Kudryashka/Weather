@@ -22,7 +22,7 @@ export async function weather() {
   const month = 5;
   const actualWind = windForceTable(weatherInfo.wind.speed);
   const wind = valueTransformer(0, 12, 0, cloudsMaxSpeed, actualWind)
-  const cloudsAmount = weatherInfo.clouds ? valueTransformer(0, 100, 0, 12, weatherInfo.clouds.all) : 0;
+  const cloudsAmount = weatherInfo.clouds ? valueTransformer(0, 100, 0, 15, weatherInfo.clouds.all) : 0;
   const cloudy = (weatherInfo.clouds && weatherInfo.clouds.all > 85) || weather.main == "Rain" || weather.main == "Drizzle"
   const treeColor = treeColors[month].cloudy ? cloudy ? treeColors[month].cloudy : treeColors[month].sunny : 0;
   const leavesSize = leavesSizes[month] ? leavesSizes[month] : 0;
@@ -32,7 +32,7 @@ export async function weather() {
     month,
     weather: weather.main,
     sky: {
-      cloudsAmount,
+      cloudsAmount: 1,
       skyColor: cloudy ? skyColors.cloudy : skyColors.sunny,
       wind: wind/4
     },
