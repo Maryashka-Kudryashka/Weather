@@ -32,7 +32,7 @@ export async function weather() {
     month,
     weather: weather.main,
     sky: {
-      cloudsAmount: 2,
+      cloudsAmount: cloudsAmount,
       skyColor: cloudy ? skyColors.cloudy : skyColors.sunny,
       wind: wind/4
     },

@@ -139,8 +139,6 @@ export function updateClouds(weatherConditions) {
   // ctx.drawImage(getLayerCanvas(scatteredClouds, "second"), kk, 0)
   // ctx.drawImage(getLayerCanvas(scatteredClouds, "second"), ll, 0)
 
-  console.log(bigClouds.length)
-
   scatteredSmallClouds.forEach(cloud => drawCloud(cloud, ctx));
   scatteredClouds.forEach(cloud => drawCloud(cloud, ctx));
   smallClouds.forEach(cloud => drawCloud(cloud, ctx));
