@@ -98,6 +98,9 @@ export function cloud(type, windSpeed) {
       newCanvas.height = canvasHeight;
       var newContext = newCanvas.getContext("2d");
 
+      newContext.rect(0,0,canvasWidth,canvasHeight)
+      newContext.stroke()
+
       clouds.forEach(el => drawCloud(el, imgCloud, newContext));
       innerClouds.forEach(el => drawCloud(el, imgInnerCloud, newContext));
 
@@ -113,7 +116,6 @@ export function cloud(type, windSpeed) {
 
   return function() {
     const cloud = getCloudCanvas(frame);
-    if (type !== "small") { console.log(frame);}
     frame =  type == "small" ? 0 : (frame + speed) % 360;
 
     return cloud;
