@@ -113,7 +113,7 @@ export function cloud(type, windSpeed) {
 
   return function() {
     const cloud = getCloudCanvas(frame);
-
+    if (type !== "small") { console.log(frame);}
     frame =  type == "small" ? 0 : (frame + speed) % 360;
 
     return cloud;
