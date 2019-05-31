@@ -37,7 +37,7 @@ window.addEventListener("load", async () => {
       updateTree(windConfig, weatherConditions);
     }
 
-    initClouds(weatherConditions)
+    // initClouds(weatherConditions)
   }
 
   init(weatherConditions);
