@@ -33,7 +33,7 @@ export function generateGrass(weatherConditions) {
   if (isWinter) {
     units = w * 4;
   } else {
-    units = w * 3;
+    units = w * 3.5;
   }
   for (var i = 0; i < units; i++) {
     var y = random(h - 170, h + 40);
