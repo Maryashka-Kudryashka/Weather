@@ -18,8 +18,8 @@ function valueTransformer(aFrom, aTo, bFrom, bTo, aVal) {
 export async function weather() {
   const weatherInfo = await fetchWeather();
   const weather = weatherInfo.weather[0];
-  // const month = new Date().getMonth();
-  const month = 5;
+  const month = new Date().getMonth();
+//   const month = 5;
   const actualWind = windForceTable(weatherInfo.wind.speed);
   const wind = valueTransformer(0, 12, 0, cloudsMaxSpeed, actualWind)
   const cloudsAmount = weatherInfo.clouds ? valueTransformer(0, 100, 0, 15, weatherInfo.clouds.all) : 0;
